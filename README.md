@@ -34,36 +34,23 @@ docker-compose up -d
 
 4. 首次使用需要注册账号
 
-### 单容器部署说明
+### 不使用 Docker 一键启动
 
-项目已配置为单容器部署，前后端都在同一个容器中，使用 Supervisor 管理 Nginx 和 FastAPI 进程。
+在已安装 **Python 3**、**Node 18+** 的前提下：
 
-**使用 Docker Compose（推荐）：**
-```bash
-docker-compose up -d
-```
+1. 安装后端依赖（首次或依赖变更时）：
+   ```bash
+   pip install -r backend/requirements.txt
+   ```
+2. 在项目根目录执行：
+   ```bash
+   ./start.sh
+   ```
+3. 浏览器访问 **http://127.0.0.1:5173**（前端由 Vite 提供，`/api` 已代理到后端 8000 端口）。
 
-**或使用 Docker 命令：**
-```bash
-# 构建镜像
-docker build -t navigate-app .
+按 `Ctrl+C` 会同时停止前后端。数据库文件位于 `./data/navigate.db`，可选复制 `.env.example` 为 `.env` 后修改 `SECRET_KEY`、`DATABASE_URL`。
 
-# 运行容器
-docker run -d \
-  --name navigate-app \
-  -p 3000:80 \
-  -v $(pwd)/data:/app/data \
-  -e SECRET_KEY=your-secret-key-change-in-production \
-  navigate-app
-```
-
-访问 http://localhost:3000
-
-**数据持久化：**
-- 数据库文件存储在 `./data/navigate.db`
-- 确保 `./data` 目录存在或有写权限
-
-### 本地开发
+### 本地开发（分别启动）
 
 #### 后端
 
@@ -134,6 +121,8 @@ navigate/
 │   │   ├── router/        # 路由配置
 │   │   ├── stores/        # Pinia 状态管理
 │   │   └── api/           # API 调用
+│   ├── Dockerfile         # 前端镜像（构建 + nginx）
+│   ├── nginx.conf         # 前端 nginx 配置（/api 代理到 backend）
 │   └── package.json
 ├── backend/               # FastAPI 后端应用
 │   ├── app/
@@ -141,12 +130,10 @@ navigate/
 │   │   ├── auth/          # 认证模块
 │   │   ├── services/      # 业务服务
 │   │   └── main.py        # 应用入口
+│   ├── Dockerfile         # 后端镜像
 │   └── requirements.txt
-├── docker-compose.yml      # Docker Compose 配置
-├── Dockerfile              # 统一 Dockerfile（前后端）
-├── docker-entrypoint.sh    # Docker 启动脚本
-├── supervisord.conf        # Supervisor 进程管理配置
-├── nginx.conf              # Nginx 配置
+├── docker-compose.yml      # Docker Compose 配置（前后端两服务）
+├── docker-entrypoint.sh    # 后端启动脚本（迁移 + 启动）
 └── README.md
 ```
 

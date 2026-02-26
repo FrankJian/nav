@@ -1,16 +1,26 @@
 version: '3.8'
 
 services:
-  app:
+  backend:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: navigate-app
-    ports:
-      - "3000:80"
+      dockerfile: backend/Dockerfile
+    container_name: navigate-backend
     environment:
       - DATABASE_URL=sqlite:////app/data/navigate.db
       - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
     volumes:
       - ./data/nav:/app/data
+    restart: unless-stopped
+    # 不对外暴露端口，仅由 frontend 通过内网代理访问
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: navigate-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
     restart: unless-stopped

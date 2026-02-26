@@ -46,6 +46,7 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
-
-
+.shared/
+.cursor/
 backend/navigate.db
+frontend/package-lock.json
