@@ -35,7 +35,7 @@ def scrape_website_info(url: str) -> Dict[str, Optional[str]]:
         response.encoding = response.apparent_encoding or 'utf-8'
         
         # 解析HTML
-        soup = BeautifulSoup(response.text, 'lxml')
+        soup = BeautifulSoup(response.text, 'html.parser')
         
         # 获取标题
         title = None
