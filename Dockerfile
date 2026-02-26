@@ -1,5 +1,5 @@
 # 多阶段构建：前端构建阶段
-FROM node:18-alpine AS frontend-builder
+FROM node:24-alpine AS frontend-builder
 
 WORKDIR /app/frontend
 
@@ -16,7 +16,7 @@ COPY frontend/ .
 RUN npm run build
 
 # 多阶段构建：后端准备阶段
-FROM python:3.11-slim AS backend-builder
+FROM python:3.13-slim AS backend-builder
 
 WORKDIR /app/backend
 
@@ -27,7 +27,7 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 最终阶段：运行环境
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 # 安装 Nginx 和 Supervisor
 RUN apt-get update && \
@@ -38,7 +38,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 # 从后端构建阶段复制 Python 依赖
-COPY --from=backend-builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=backend-builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=backend-builder /usr/local/bin /usr/local/bin
 
 # 复制后端应用代码

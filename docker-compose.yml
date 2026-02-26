@@ -12,5 +12,5 @@ services:
       - DATABASE_URL=sqlite:////app/data/navigate.db
       - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
     volumes:
-      - ./data:/app/data
+      - ./data/nav:/app/data
     restart: unless-stopped
