@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: navigate-app
+    ports:
+      - "3000:80"
+    environment:
+      - DATABASE_URL=sqlite:////app/data/navigate.db
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
