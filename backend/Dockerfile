@@ -2,7 +2,8 @@
 FROM python:3.13-slim AS builder
 
 # lxml 从源码构建需要 libxml2/libxslt 开发包
-RUN apt-get install -y --no-install-recommends libxml2-dev libxslt-dev build-essential && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libxml2-dev libxslt-dev build-essential && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
