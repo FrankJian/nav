@@ -10,7 +10,7 @@ services:
       - DATABASE_URL=sqlite:////app/data/navigate.db
       - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
     volumes:
-      - ./data/nav:/app/data
+      - /data/nav:/app/data
     restart: unless-stopped
     # 不对外暴露端口，仅由 frontend 通过内网代理访问
 
