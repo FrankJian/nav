@@ -18,6 +18,12 @@ RUN npm run build
 # 多阶段构建：后端准备阶段
 FROM python:3.13-slim AS backend-builder
 
+# lxml 从源码构建需要 libxml2/libxslt 开发包
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libxml2-dev libxslt-dev build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app/backend
 
 # 复制后端依赖文件
