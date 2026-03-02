@@ -18,7 +18,9 @@ function getTokenFromCookie() {
 
 function setTokenCookie(token) {
   if (token) {
-    document.cookie = `${TOKEN_COOKIE_NAME}=${encodeURIComponent(token)}; path=/; max-age=${TOKEN_COOKIE_MAX_AGE}; SameSite=Lax`
+    const secure = typeof location !== 'undefined' && location.protocol === 'https:'
+    const securePart = secure ? '; Secure' : ''
+    document.cookie = `${TOKEN_COOKIE_NAME}=${encodeURIComponent(token)}; path=/; max-age=${TOKEN_COOKIE_MAX_AGE}; SameSite=Lax${securePart}`
   } else {
     document.cookie = `${TOKEN_COOKIE_NAME}=; path=/; max-age=0`
   }
@@ -119,6 +121,19 @@ export const useAuthStore = defineStore('auth', () => {
     setUser(null)
   }
 
+  // 从存储恢复 token 和 user（用于每次进入页面前在路由守卫里调用，解决移动端关掉浏览器重开时状态未恢复的问题）
+  function rehydrateFromStorage() {
+    const storedToken = getStoredToken()
+    const storedUser = getStoredUser()
+    if (storedToken) {
+      token.value = storedToken
+      api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`
+    }
+    if (storedUser !== null) {
+      user.value = storedUser
+    }
+  }
+
   // 初始化：如果有 token，设置到 axios 并获取用户信息
   if (token.value) {
     api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
@@ -132,6 +147,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
-    fetchUser
+    fetchUser,
+    rehydrateFromStorage
   }
 })
