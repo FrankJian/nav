@@ -24,78 +24,88 @@
           </div>
         </div>
 
-        <!-- 右侧：操作按钮和用户信息 -->
+        <!-- 右侧：未登录显示登录按钮，已登录显示操作与用户菜单 -->
         <div class="navbar-right">
-          <!-- 操作按钮组 -->
-          <div class="action-buttons">
-            <button
-              @click="showAddCategoryModal = true"
-              class="action-btn"
-              title="添加分类"
-            >
-              <Icon icon="mdi:folder-plus-outline" />
-              <span class="action-label">分类</span>
-            </button>
-            <button
-              @click="showAddWebsiteModal = true"
-              class="action-btn action-btn-primary"
-              title="添加网站"
-            >
-              <Icon icon="mdi:plus" />
-              <span class="action-label">添加</span>
-            </button>
-            <button
-              @click="toggleDarkMode"
-              class="action-btn"
-              :title="isDark ? '切换到浅色模式' : '切换到深色模式'"
-            >
-              <Icon :icon="isDark ? 'mdi:weather-sunny' : 'mdi:weather-night'" />
-            </button>
-          </div>
+          <!-- 深色模式切换（始终显示） -->
+          <button
+            @click="toggleDarkMode"
+            class="action-btn"
+            :title="isDark ? '切换到浅色模式' : '切换到深色模式'"
+          >
+            <Icon :icon="isDark ? 'mdi:weather-sunny' : 'mdi:weather-night'" />
+          </button>
 
-          <!-- 用户菜单 -->
-          <div class="user-menu" ref="userMenuRef">
-            <div 
-              @click.stop="toggleUserDropdown"
-              class="user-profile"
-              title="用户菜单"
-            >
-              <div class="user-avatar">
-                {{ userInitial }}
-              </div>
-              <div class="user-info-text hidden-sm">
-                <div class="user-name">{{ authStore.user?.display_name || '用户' }}</div>
-                <div class="user-email">{{ authStore.user?.email || '' }}</div>
-              </div>
-              <Icon 
-                icon="mdi:chevron-down" 
-                class="user-chevron hidden-sm"
-                :class="{ 'chevron-rotate': showUserDropdown }"
-              />
-            </div>
-            
-            <!-- 下拉菜单 -->
-            <div 
-              v-if="showUserDropdown"
-              class="user-dropdown glass"
-            >
+          <template v-if="authStore.isAuthenticated">
+            <div class="action-buttons">
               <button
-                @click="handleEditUserInfo"
-                class="dropdown-item"
+                @click="showAddCategoryModal = true"
+                class="action-btn"
+                title="添加分类"
               >
-                <Icon icon="mdi:account-edit" />
-                <span>修改用户信息</span>
+                <Icon icon="mdi:folder-plus-outline" />
+                <span class="action-label">分类</span>
               </button>
-              <div class="dropdown-divider"></div>
               <button
-                @click="handleLogoutClick"
-                class="dropdown-item dropdown-item-danger"
+                @click="showAddWebsiteModal = true"
+                class="action-btn action-btn-primary"
+                title="添加网站"
               >
-                <Icon icon="mdi:logout" />
-                <span>退出登录</span>
+                <Icon icon="mdi:plus" />
+                <span class="action-label">添加</span>
               </button>
             </div>
-          </div>
+
+            <div class="user-menu" ref="userMenuRef">
+              <div 
+                @click.stop="toggleUserDropdown"
+                class="user-profile"
+                title="用户菜单"
+              >
+                <div class="user-avatar">
+                  {{ userInitial }}
+                </div>
+                <div class="user-info-text hidden-sm">
+                  <div class="user-name">{{ authStore.user?.display_name || '用户' }}</div>
+                  <div class="user-email">{{ authStore.user?.email || '' }}</div>
+                </div>
+                <Icon 
+                  icon="mdi:chevron-down" 
+                  class="user-chevron hidden-sm"
+                  :class="{ 'chevron-rotate': showUserDropdown }"
+                />
+              </div>
+              <div 
+                v-if="showUserDropdown"
+                class="user-dropdown glass"
+              >
+                <button
+                  @click="handleEditUserInfo"
+                  class="dropdown-item"
+                >
+                  <Icon icon="mdi:account-edit" />
+                  <span>修改用户信息</span>
+                </button>
+                <div class="dropdown-divider"></div>
+                <button
+                  @click="handleLogoutClick"
+                  class="dropdown-item dropdown-item-danger"
+                >
+                  <Icon icon="mdi:logout" />
+                  <span>退出登录</span>
+                </button>
+              </div>
+            </div>
+          </template>
+
+          <!-- 未登录：登录按钮（桌面端与移动端均适配） -->
+          <router-link
+            v-else
+            to="/login"
+            class="login-btn"
+          >
+            <Icon icon="mdi:login" class="login-btn-icon" />
+            <span class="login-btn-text">登录</span>
+          </router-link>
         </div>
       </div>
     </nav>
@@ -103,13 +113,31 @@
     <!-- 内容区域 -->
     <div class="content-section">
 
-      <!-- 加载状态 -->
-      <div v-if="loading" class="loading-state">
+      <!-- 未登录：引导登录，不请求数据 -->
+      <div v-if="!authStore.isAuthenticated" class="guest-state">
+        <div class="guest-content glass">
+          <Icon icon="mdi:compass-outline" class="guest-icon" />
+          <p class="guest-title">网站导航</p>
+          <p class="guest-desc">登录后即可管理您的分类与常用网站</p>
+          <div class="guest-actions">
+            <router-link to="/login" class="btn-primary guest-btn">
+              <Icon icon="mdi:login" />
+              <span>登录</span>
+            </router-link>
+            <router-link to="/register" class="btn-secondary guest-btn">
+              <span>注册</span>
+            </router-link>
+          </div>
+        </div>
+      </div>
+
+      <!-- 已登录：加载状态 -->
+      <div v-else-if="loading" class="loading-state">
         <div class="spinner"></div>
         <p>加载中...</p>
       </div>
 
-      <!-- 空状态 -->
+      <!-- 已登录：空状态 -->
       <div v-else-if="filteredCategories.length === 0" class="empty-state">
         <div class="empty-content glass">
           <Icon icon="mdi:web-off" class="empty-icon" />
@@ -120,7 +148,7 @@
         </div>
       </div>
 
-      <!-- 分类和网站展示 -->
+      <!-- 已登录：分类和网站展示 -->
       <div v-else class="content-area">
         <!-- 分类指示器 -->
         <div class="category-indicators">
@@ -1033,11 +1061,10 @@ const handleClickOutside = (event) => {
 }
 
 onMounted(() => {
-  fetchData()
-  if (authStore.isAuthenticated && !authStore.user) {
-    authStore.fetchUser()
+  if (authStore.isAuthenticated) {
+    if (!authStore.user) authStore.fetchUser()
+    fetchData()
   }
-  // 添加点击外部关闭下拉菜单的监听
   document.addEventListener('click', handleClickOutside)
 })
 
@@ -1303,6 +1330,106 @@ onUnmounted(() => {
 
 .action-btn-primary:active {
   transform: translateY(0);
+}
+
+/* 导航栏登录按钮（未登录时，桌面/移动端适配） */
+.login-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: var(--transition-hover);
+}
+
+.login-btn:hover {
+  background: linear-gradient(135deg, var(--primary-hover) 0%, #7c3aed 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+  color: white;
+}
+
+.login-btn:active {
+  transform: translateY(0);
+}
+
+.login-btn-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+
+/* 访客状态（未登录时主内容区） */
+.guest-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem 1rem;
+}
+
+.guest-content {
+  text-align: center;
+  padding: 2.5rem 2rem;
+  border-radius: var(--radius-lg);
+  max-width: 22rem;
+}
+
+.guest-icon {
+  width: 4rem;
+  height: 4rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.guest-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.guest-desc {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.guest-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.guest-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: var(--transition-hover);
+}
+
+.guest-btn.btn-primary {
+  color: white;
+}
+
+.guest-btn.btn-primary:hover {
+  color: white;
+  transform: translateY(-1px);
 }
 
 .action-label {
@@ -2137,23 +2264,50 @@ onUnmounted(() => {
     right: -0.5rem;
     min-width: 180px;
   }
+
+  .login-btn {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+
+  .guest-state {
+    min-height: 50vh;
+    padding: 1.5rem 0.75rem;
+  }
+
+  .guest-content {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .guest-actions {
+    flex-direction: column;
+  }
+
+  .guest-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 640px) {
   .hidden-sm {
     display: none;
   }
-  
+
   .navbar-container {
     gap: 1rem;
   }
-  
+
   .action-buttons {
     gap: 0.25rem;
   }
-  
+
   .content-section {
     padding: 1.5rem 1rem;
+  }
+
+  .login-btn {
+    padding: 0.5rem 0.75rem;
   }
 }
 </style>
